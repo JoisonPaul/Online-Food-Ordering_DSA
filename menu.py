@@ -20,3 +20,4 @@ menu = [
     {"id": 119, "name": "Idli Sambar", "category": "South Indian", "price": 99},
     {"id": 120, "name": "Paneer Tikka", "category": "Starters", "price": 189}
 ]
+print("Hello")
