@@ -141,7 +141,7 @@ def main():
         print("7. Exit")
         print("========================================")
 
-        choice = input("Enter your choice: ").strip()
+        choice = input("Enter your choice (1-7): ").strip()
 
         if choice == "1":
             display_menu()
@@ -166,7 +166,7 @@ def main():
             break
 
         else:
-            print("\nInvalid choice. Please try again.")
+            print("\nInvalid choice. Enter a number from 1 to 7.")
 
 
 if __name__ == "__main__":
