@@ -1,14 +1,67 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Place Order</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <h1>Place Your Order</h1>
-    <p>This page will be connected to the Order class and Circular Queue.</p>
 
-    <a href="/">Back to Search</a>
+    <h1>Place Your Order</h1>
+
+    <nav>
+        <a href="/">Search</a>
+        <a href="/menu">Menu</a>
+        <a href="/place-order">Place Order</a>
+    </nav>
+
+    <form method="POST" action="/place-order">
+        <label for="customer_name">Customer Name:</label><br>
+        <input
+            type="text"
+            id="customer_name"
+            name="customer_name"
+            required
+        ><br><br>
+
+        <label for="item_id">Food ID:</label><br>
+        <input
+            type="number"
+            id="item_id"
+            name="item_id"
+            min="1"
+            required
+        ><br><br>
+
+        <label for="quantity">Quantity:</label><br>
+        <input
+            type="number"
+            id="quantity"
+            name="quantity"
+            min="1"
+            required
+        ><br><br>
+
+        <button type="submit">Place Order</button>
+    </form>
+
+    {% if message %}
+        <h3>{{ message }}</h3>
+    {% endif %}
+
+    {% if order %}
+        <div class="food-card">
+            <h2>Order Confirmation</h2>
+            <p>Order ID: {{ order.order_id }}</p>
+            <p>Customer: {{ order.customer_name }}</p>
+            <p>Food Item: {{ order.item_name }}</p>
+            <p>Quantity: {{ order.quantity }}</p>
+            <p>Total: ₹{{ order.total }}</p>
+            <p>Status: {{ order.status }}</p>
+        </div>
+    {% endif %}
+
 </body>
 </html>
