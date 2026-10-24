@@ -4,11 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Food Search</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <h1>Online Food Ordering System</h1>
-    <p>Flask is running successfully!</p>
 
-    <a href="/place-order">Go to Place Order</a>
+    <h1>Search Food by Category</h1>
+
+    <nav>
+        <a href="/">Search</a>
+        <a href="/menu">Menu</a>
+        <a href="/place-order">Place Order</a>
+    </nav>
+
+    <form method="POST" action="/">
+        <input
+            type="text"
+            name="category"
+            placeholder="Enter category (e.g. Pizza)"
+            value="{{ category }}"
+            required
+        >
+        <button type="submit">Search</button>
+    </form>
+
+    {% if searched %}
+        {% if results %}
+            <h2>Search Results</h2>
+
+            <div class="menu-container">
+                {% for item in results %}
+                    <div class="food-card">
+                        <h2>{{ item.name }}</h2>
+                        <p>Food ID: {{ item.id }}</p>
+                        <p>Category: {{ item.category }}</p>
+                        <p>Price: ₹{{ item.price }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No food items found in this category.</p>
+        {% endif %}
+    {% endif %}
+
 </body>
 </html>
