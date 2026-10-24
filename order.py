@@ -47,8 +47,8 @@ class Order:
         print("Customer    :", self.customer_name)
         print("Item        :", self.item_name)
         print("Quantity    :", self.quantity)
-        print("Unit Price  : ₹", self.price)
-        print("Total       : ₹", self.total)
+        print("Unit Price  : Rs.", self.price)
+        print("Total       : Rs.", self.total)
         print("Status      :", self.status)
 
     def __str__(self):

@@ -87,7 +87,7 @@ class CircularQueue:
                 f"Customer: {order['customer_name']} | "
                 f"Item: {order['item_name']} | "
                 f"Quantity: {order['quantity']} | "
-                f"Total: ₹{order['total']}"
+                f"Total: Rs. {order['total']}"
             )
 
             if i == self.rear:
