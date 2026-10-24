@@ -88,10 +88,12 @@ def display_search_results(results):
     print("-" * 40)
 
     for item in results:
+        status = "Available" if item.get("is_available", True) else "Out of Stock"
         print(f"ID      : {item['id']}")
         print(f"Name    : {item['name']}")
         print(f"Category: {item['category']}")
         print(f"Price   : Rs. {item['price']}")
+        print(f"Status  : {status}")
         print("-" * 40)
 
 
