@@ -1,134 +1,126 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hash Table Visualization</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
+{% extends "base.html" %}
 
-    <header>
-        <h1>Hash Table Visualization</h1>
-        <p class="page-subtitle">Explore food lookup, buckets, and collision handling.</p>
+{% block title %}Hash Table Visualization | Sunbeam Café{% endblock %}
 
-        <nav>
-            <a href="/">Home</a>
-            <a href="/menu">Menu</a>
-            <a href="/search">Search Food</a>
-            <a href="/orders/new">Place Order</a>
-            <a href="/orders/pending">Manage Orders</a>
-            <a href="/hash-table" class="active">Hash Table</a>
-        </nav>
-    </header>
+{% block content %}
+<div class="hash-page">
 
-    <main class="hash-page">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>Hash Table Architecture</h1>
+        <p class="page-subtitle">Interactive visualization of separate chaining collision resolution and O(1) average lookup.</p>
+    </div>
 
-        <section class="hash-summary">
-            <div class="hash-summary-card">
-                <span class="hash-number">{{ data.capacity }}</span>
-                <span>Total Buckets</span>
-            </div>
+    <!-- Summary Metrics Strip -->
+    <section class="hash-summary">
+        <div class="hash-summary-card">
+            <span class="hash-number">{{ data.capacity }}</span>
+            <span>Total Buckets</span>
+        </div>
 
-            <div class="hash-summary-card">
-                <span class="hash-number">{{ data.total_items }}</span>
-                <span>Food Items Stored</span>
-            </div>
+        <div class="hash-summary-card">
+            <span class="hash-number">{{ data.total_items }}</span>
+            <span>Food Items Stored</span>
+        </div>
 
-            <div class="hash-summary-card">
-                <span class="hash-number">{{ collision_count }}</span>
-                <span>Buckets with Collisions</span>
-            </div>
-        </section>
+        <div class="hash-summary-card">
+            <span class="hash-number">{{ collision_count }}</span>
+            <span>Buckets with Collisions</span>
+        </div>
+    </section>
 
-        <section class="hash-explanation">
-            <h2>How Hashing Works</h2>
+    <!-- Technical Explanation -->
+    <section class="hash-explanation">
+        <h2>How Hashing Works</h2>
+        <p>
+            Every available food item is indexed using its integer Food ID as the key.
+            The modulo division hash function determines the target bucket index in constant time.
+        </p>
 
-            <p>
-                Each food item is stored using its unique Food ID as the key.
-                The hash function calculates a bucket index where the item is stored.
-            </p>
+        <div class="hash-formula">
+            <strong>Hash Function Formula</strong>
+            <code>index = Food_ID % Capacity (10)</code>
+        </div>
 
-            <div class="hash-formula">
-                <strong>Hash Function</strong>
-                <code>index = Food ID % Capacity</code>
-            </div>
+        <p style="margin-top: 12px; margin-bottom: 0;">
+            When two or more items map to the same bucket index (e.g. ID 101 and ID 111 both yield 1),
+            <strong>separate chaining</strong> links them in a singly-linked list at that bucket slot.
+        </p>
+    </section>
 
-            <p>
-                When multiple food items map to the same bucket,
-                <strong>separate chaining</strong> stores them in a linked chain.
-            </p>
-        </section>
+    <!-- Bucket Rows Diagram -->
+    <section class="hash-buckets-section">
+        <h2>Bucket Distribution &amp; Collision Chains</h2>
+        <p class="hash-description">
+            Each row represents a bucket slot in the array. Chained node cards demonstrate linked list traversal.
+        </p>
 
-        <section class="hash-buckets-section">
-            <h2>Bucket Distribution</h2>
-            <p class="hash-description">
-                Each bucket shows its index and the food items stored in it.
-            </p>
+        <div class="hash-bucket-grid">
+            {% for bucket in data.buckets %}
+                <div class="hash-bucket {% if bucket['items']|length > 1 %}has-collision{% endif %}">
 
-            <div class="hash-bucket-grid">
-                {% for bucket in data.buckets %}
-                    <div class="hash-bucket
-                        {% if bucket["items"]|length > 1 %}has-collision{% endif %}">
+                    <div class="bucket-heading">
+                        <span>Bucket [{{ "%02d"|format(bucket["index"]) }}]</span>
 
-                        <div class="bucket-heading">
-                            <span>Bucket {{ bucket["index"] }}</span>
-
-                            {% if bucket["items"]|length > 1 %}
-                                <span class="collision-badge">Collision</span>
-                            {% endif %}
-                        </div>
-
-                        <div class="bucket-content">
-                            {% if bucket["items"] %}
-                                {% for item in bucket["items"] %}
-                                    <div class="hash-node">
-                                        <strong>{{ item.name }}</strong>
-                                        <span>Food ID: {{ item.id }}</span>
-                                        <span>Price: ₹{{ item.price }}</span>
-                                    </div>
-
-                                    {% if not loop.last %}
-                                        <div class="chain-arrow">↓</div>
-                                    {% endif %}
-                                {% endfor %}
-                            {% else %}
-                                <p class="empty-bucket">Empty bucket</p>
-                            {% endif %}
-                        </div>
-
+                        {% if bucket["items"]|length > 1 %}
+                            <span class="collision-badge">Collision Chain ({{ bucket["items"]|length }})</span>
+                        {% endif %}
                     </div>
-                {% endfor %}
+
+                    <div class="bucket-content">
+                        {% if bucket["items"] %}
+                            {% for item in bucket["items"] %}
+                                <div class="hash-node">
+                                    <strong>{{ item.name }}</strong>
+                                    <span>ID: {{ item.id }}</span>
+                                    <span>Price: ₹{{ item.price }}</span>
+                                </div>
+
+                                {% if not loop.last %}
+                                    <div class="chain-arrow" aria-hidden="true">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                                            <polyline points="12 5 19 12 12 19"></polyline>
+                                        </svg>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <p class="empty-bucket">Empty (NULL pointer)</p>
+                        {% endif %}
+                    </div>
+
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- DSA Operations Grid -->
+    <section class="hash-notes">
+        <h2>Core DSA Operations</h2>
+
+        <div class="hash-notes-grid">
+            <div class="hash-note-card">
+                <h3>1. Insertion</h3>
+                <p>O(1) time complexity. Computes bucket index and prepends node to chain head.</p>
             </div>
-        </section>
 
-        <section class="hash-notes">
-            <h2>DSA Operations</h2>
-
-            <div class="hash-notes-grid">
-                <div class="hash-note-card">
-                    <h3>Insertion</h3>
-                    <p>Food items are inserted into the hash table during initialization.</p>
-                </div>
-
-                <div class="hash-note-card">
-                    <h3>Searching</h3>
-                    <p>Food IDs are used to locate items through the hash table.</p>
-                </div>
-
-                <div class="hash-note-card">
-                    <h3>Collision Handling</h3>
-                    <p>Separate chaining allows multiple items to occupy the same bucket.</p>
-                </div>
-
-                <div class="hash-note-card">
-                    <h3>Deletion</h3>
-                    <p>When an item sells out, it is removed from the hash table.</p>
-                </div>
+            <div class="hash-note-card">
+                <h3>2. Searching</h3>
+                <p>O(1) average time. Hashes key and traverses only the target short bucket chain.</p>
             </div>
-        </section>
 
-    </main>
+            <div class="hash-note-card">
+                <h3>3. Collision Handling</h3>
+                <p>Separate chaining preserves all colliding entries without clustering artifacts.</p>
+            </div>
 
-</body>
-</html>
+            <div class="hash-note-card">
+                <h3>4. Deletion</h3>
+                <p>O(1) average time. Unlinks sold-out food items from the bucket linked list.</p>
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

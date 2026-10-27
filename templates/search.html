@@ -1,93 +1,127 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Food</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
+{% extends "base.html" %}
 
-    <header>
+{% block title %}Search Food | Sunbeam Café{% endblock %}
+
+{% block content %}
+<div class="search-page">
+
+    <!-- Page Header -->
+    <div class="page-header">
         <h1>Search Food by Category</h1>
-        <p class="page-subtitle">Find your favourite food in seconds.</p>
+        <p class="page-subtitle">Filter items using sequential search algorithm across all menu categories.</p>
+    </div>
 
-        <nav>
-            <a href="/">Home</a>
-            <a href="/menu">Menu</a>
-            <a href="/search" class="active">Search Food</a>
-            <a href="/orders/new">Place Order</a>
-            <a href="/orders/pending">Manage Orders</a>
-            <a href="/hash-table">Hash Table</a>
-        </nav>
-    </header>
+    <!-- Search Card & Form -->
+    <section class="search-card">
+        <h2>What are you craving today?</h2>
+        <p>Enter a food category below to browse matching café selections.</p>
 
-    <main class="search-page">
+        <form method="POST" action="{{ url_for('search_food') }}" class="search-form">
+            <input
+                type="text"
+                id="category"
+                name="category"
+                placeholder="e.g. Pizza, Burger, Biryani, Dessert..."
+                value="{{ category }}"
+                aria-label="Food category"
+                autocomplete="off"
+            >
+            <button type="submit">
+                <span>Search</span>
+            </button>
+        </form>
 
-        <section class="search-card">
-            <h2>What are you craving?</h2>
-            <p>Enter a food category to find matching items.</p>
+        <div class="category-hints">
+            <span class="category-hint-pill" onclick="document.getElementById('category').value='Pizza'; this.closest('form, div').previousElementSibling.submit();">Pizza</span>
+            <span class="category-hint-pill" onclick="document.getElementById('category').value='Burger'; this.closest('form, div').previousElementSibling.submit();">Burger</span>
+            <span class="category-hint-pill" onclick="document.getElementById('category').value='Biryani'; this.closest('form, div').previousElementSibling.submit();">Biryani</span>
+            <span class="category-hint-pill" onclick="document.getElementById('category').value='Dessert'; this.closest('form, div').previousElementSibling.submit();">Dessert</span>
+            <span class="category-hint-pill" onclick="document.getElementById('category').value='Beverages'; this.closest('form, div').previousElementSibling.submit();">Beverages</span>
+            <span class="category-hint-pill" onclick="document.getElementById('category').value='South Indian'; this.closest('form, div').previousElementSibling.submit();">South Indian</span>
+        </div>
+    </section>
 
-            <form method="POST" action="{{ url_for('search_food') }}" class="search-form">
-                <input
-                    type="text"
-                    name="category"
-                    placeholder="e.g. Pizza, Burger, Dessert"
-                    value="{{ category }}"
-                    aria-label="Food category"
-                >
-                <button type="submit">Search</button>
-            </form>
+    <!-- Search Results Section -->
+    {% if searched %}
+        <section class="search-results">
+            <h2>Search Results</h2>
 
-            <div class="category-hints">
-                <span>Pizza</span>
-                <span>Burger</span>
-                <span>Biryani</span>
-                <span>Dessert</span>
-                <span>Beverages</span>
-            </div>
-        </section>
+            {% if results %}
+                <p class="results-count">
+                    Found {{ results|length }} matching item(s) for &ldquo;{{ category }}&rdquo;.
+                </p>
 
-        {% if searched %}
-            <section class="search-results">
-                <h2>Search Results</h2>
+                <div class="menu-container">
+                    {% for item in results %}
+                        <div class="food-card">
 
-                {% if results %}
-                    <p class="results-count">
-                        Found {{ results|length }} matching item(s).
-                    </p>
+                            <div>
+                                <div class="food-card-header">
+                                    <span class="food-category">{{ item.category }}</span>
 
-                    <div class="menu-container">
-                        {% for item in results %}
-                            <div class="food-card">
+                                    {% if item.quantity > 0 and item.is_available %}
+                                        <span class="stock-badge in-stock">
+                                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <polyline points="20 6 9 17 4 12"></polyline>
+                                            </svg>
+                                            In Stock
+                                        </span>
+                                    {% else %}
+                                        <span class="stock-badge sold-out">
+                                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                                            </svg>
+                                            Out of Stock
+                                        </span>
+                                    {% endif %}
+                                </div>
+
                                 <h3>{{ item.name }}</h3>
-                                <p><strong>Food ID:</strong> {{ item.id }}</p>
-                                <p><strong>Category:</strong> {{ item.category }}</p>
-                                <p><strong>Price:</strong> ₹{{ item.price }}</p>
-                                <p><strong>Available Quantity:</strong> {{ item.quantity }}</p>
 
+                                <p class="food-id">Food ID: {{ item.id }}</p>
+
+                                <div class="food-details">
+                                    <p>
+                                        <span>Price</span>
+                                        <strong>₹{{ item.price }}</strong>
+                                    </p>
+
+                                    <p>
+                                        <span>Available Quantity</span>
+                                        <strong>{{ item.quantity }}</strong>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div>
                                 {% if item.quantity > 0 and item.is_available %}
                                     <a class="food-order-button"
                                        href="{{ url_for('place_order', item_id=item.id) }}">
-                                        Order Now
+                                        <span>Order Now</span>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <polyline points="9 18 15 12 9 6"></polyline>
+                                        </svg>
                                     </a>
                                 {% else %}
-                                    <p class="out-of-stock">Out of Stock</p>
+                                    <button class="food-disabled-button" disabled>
+                                        Currently Unavailable
+                                    </button>
                                 {% endif %}
                             </div>
-                        {% endfor %}
-                    </div>
 
-                {% else %}
-                    <div class="no-results">
-                        <h3>No matching food found</h3>
-                        <p>Try another category, such as Pizza, Burger, or Dessert.</p>
-                    </div>
-                {% endif %}
-            </section>
-        {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
 
-    </main>
+            {% else %}
+                <div class="no-results">
+                    <h3>No matching food found</h3>
+                    <p>No items matched &ldquo;{{ category }}&rdquo;. Try searching for &ldquo;Pizza&rdquo;, &ldquo;Burger&rdquo;, or &ldquo;Dessert&rdquo;.</p>
+                </div>
+            {% endif %}
+        </section>
+    {% endif %}
 
-</body>
-</html>
+</div>
+{% endblock %}
