@@ -3,48 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Food Search</title>
+    <title>Search Food</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
-    <h1>Search Food by Category</h1>
+    <header>
+        <h1>Search Food by Category</h1>
+        <p class="page-subtitle">Find your favourite food in seconds.</p>
 
-    <nav>
-        <a href="/">Search</a>
-        <a href="/menu">Menu</a>
-        <a href="/place-order">Place Order</a>
-    </nav>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/menu">Menu</a>
+            <a href="/search" class="active">Search Food</a>
+            <a href="/orders/new">Place Order</a>
+            <a href="/orders/pending">Manage Orders</a>
+            <a href="/hash-table">Hash Table</a>
+        </nav>
+    </header>
 
-    <form method="POST" action="/search">
-        <input
-            type="text"
-            name="category"
-            placeholder="Enter category (e.g. Pizza)"
-            value="{{ category }}"
-            required
-        >
-        <button type="submit">Search</button>
-    </form>
+    <main class="search-page">
 
-    {% if searched %}
-        {% if results %}
-            <h2>Search Results</h2>
+        <section class="search-card">
+            <h2>What are you craving?</h2>
+            <p>Enter a food category to find matching items.</p>
 
-            <div class="menu-container">
-                {% for item in results %}
-                    <div class="food-card">
-                        <h2>{{ item.name }}</h2>
-                        <p>Food ID: {{ item.id }}</p>
-                        <p>Category: {{ item.category }}</p>
-                        <p>Price: ₹{{ item.price }}</p>
-                    </div>
-                {% endfor %}
+            <form method="POST" action="{{ url_for('search_food') }}" class="search-form">
+                <input
+                    type="text"
+                    name="category"
+                    placeholder="e.g. Pizza, Burger, Dessert"
+                    value="{{ category }}"
+                    aria-label="Food category"
+                >
+                <button type="submit">Search</button>
+            </form>
+
+            <div class="category-hints">
+                <span>Pizza</span>
+                <span>Burger</span>
+                <span>Biryani</span>
+                <span>Dessert</span>
+                <span>Beverages</span>
             </div>
-        {% else %}
-            <p>No food items found in this category.</p>
+        </section>
+
+        {% if searched %}
+            <section class="search-results">
+                <h2>Search Results</h2>
+
+                {% if results %}
+                    <p class="results-count">
+                        Found {{ results|length }} matching item(s).
+                    </p>
+
+                    <div class="menu-container">
+                        {% for item in results %}
+                            <div class="food-card">
+                                <h3>{{ item.name }}</h3>
+                                <p><strong>Food ID:</strong> {{ item.id }}</p>
+                                <p><strong>Category:</strong> {{ item.category }}</p>
+                                <p><strong>Price:</strong> ₹{{ item.price }}</p>
+                                <p><strong>Available Quantity:</strong> {{ item.quantity }}</p>
+
+                                {% if item.quantity > 0 and item.is_available %}
+                                    <a class="food-order-button"
+                                       href="{{ url_for('place_order', item_id=item.id) }}">
+                                        Order Now
+                                    </a>
+                                {% else %}
+                                    <p class="out-of-stock">Out of Stock</p>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                {% else %}
+                    <div class="no-results">
+                        <h3>No matching food found</h3>
+                        <p>Try another category, such as Pizza, Burger, or Dessert.</p>
+                    </div>
+                {% endif %}
+            </section>
         {% endif %}
-    {% endif %}
+
+    </main>
 
 </body>
 </html>

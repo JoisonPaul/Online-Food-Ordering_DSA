@@ -93,6 +93,42 @@ class HashTable:
 
         return None
 
+    
+    def delete(self, key):
+        """
+        Remove a menu item from the hash table using its key.
+
+        Returns:
+            bool: True if deleted, False if key not found.
+
+        Time Complexity:
+            Average Case: O(1)
+            Worst Case: O(n)
+        """
+        index = self._hash(key)
+        current = self.buckets[index]
+        previous = None
+
+        while current is not None:
+            if current.key == key:
+
+                # Case 1: Node is at the beginning of the chain
+                if previous is None:
+                    self.buckets[index] = current.next
+
+                # Case 2: Node is in the middle or at the end
+                else:
+                    previous.next = current.next
+
+                self.count -= 1
+                return True
+
+            previous = current
+            current = current.next
+
+        return False
+
+
     def update_availability(self, key, is_available):
         """
         Update the availability status of a menu item.
@@ -169,3 +205,17 @@ if __name__ == "__main__":
     print("\n--- Availability Update Test ---")
     ht.update_availability(101, False)
     print("Updated ID 101 availability to False:", ht.search(101))
+
+    
+    print("\n--- Deletion Test ---")
+
+    print("Before deletion:", ht.search(106))
+
+    deleted = ht.delete(106)
+
+    print("Deletion successful:", deleted)
+    print("After deletion:", ht.search(106))
+    print("Total items remaining:", ht.count)
+
+    ht.display_table()
+

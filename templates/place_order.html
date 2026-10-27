@@ -1,67 +1,99 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Place Order</title>
+    <title>Place Your Order</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
-    <h1>Place Your Order</h1>
+    <header>
+        <h1>Place Your Order</h1>
+        <p class="page-subtitle">Enter your details to order your favourite food.</p>
 
-    <nav>
-        <a href="/">Search</a>
-        <a href="/menu">Menu</a>
-        <a href="/orders/new">Place Order</a>
-    </nav>
+        <nav>
+            <a href="/search">Search</a>
+            <a href="/menu">Menu</a>
+            <a href="/orders/new" class="active">Place Order</a>
+            <a href="/orders/pending">Manage Orders</a>
+            <a href="/hash-table">Hash Table</a>
+        </nav>
+    </header>
 
-    <form method="POST" action="/orders/new">
-        <label for="customer_name">Customer Name:</label><br>
-        <input
-            type="text"
-            id="customer_name"
-            name="customer_name"
-            required
-        ><br><br>
+    <main class="order-page">
 
-        <label for="item_id">Food ID:</label><br>
-        <input
-            type="number"
-            id="item_id"
-            name="item_id"
-            min="1"
-            required
-        ><br><br>
+        <section class="order-form-card">
+            <h2>Order Details</h2>
+            <p class="form-description">Fill in the details below to place your order.</p>
 
-        <label for="quantity">Quantity:</label><br>
-        <input
-            type="number"
-            id="quantity"
-            name="quantity"
-            min="1"
-            required
-        ><br><br>
+            <form method="POST" action="{{ url_for('place_order') }}">
 
-        <button type="submit">Place Order</button>
-    </form>
+                <div class="form-group">
+                    <label for="customer_name">Customer Name</label>
+                    <input
+                        type="text"
+                        id="customer_name"
+                        name="customer_name"
+                        placeholder="Enter your name"
+                        required
+                    >
+                </div>
 
-    {% if message %}
-        <h3>{{ message }}</h3>
-    {% endif %}
+                <div class="form-group">
+                    <label for="item_id">Food ID</label>
+                    <input
+                        type="number"
+                        id="item_id"
+                        name="item_id"
+                        min="1"
+                        value="{{ selected_item_id }}"
+                        placeholder="Example: 102"
+                        required
+                    >
+                    <small>Check the Food ID on the Menu page.</small>
+                </div>
 
-    {% if order %}
-        <div class="food-card">
-            <h2>Order Confirmation</h2>
-            <p>Order ID: {{ order.order_id }}</p>
-            <p>Customer: {{ order.customer_name }}</p>
-            <p>Food Item: {{ order.item_name }}</p>
-            <p>Quantity: {{ order.quantity }}</p>
-            <p>Total: ₹{{ order.total }}</p>
-            <p>Status: {{ order.status }}</p>
+                <div class="form-group">
+                    <label for="quantity">Quantity</label>
+                    <input
+                        type="number"
+                        id="quantity"
+                        name="quantity"
+                        min="1"
+                        placeholder="Enter quantity"
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="order-button">Place Order</button>
+
+            </form>
+        </section>
+
+        {% if message %}
+            <div class="message-box">
+                {{ message }}
+            </div>
+        {% endif %}
+
+        {% if order %}
+            <section class="order-confirmation">
+                <h2>Order Confirmation</h2>
+                <p><strong>Order ID:</strong> {{ order.order_id }}</p>
+                <p><strong>Customer:</strong> {{ order.customer_name }}</p>
+                <p><strong>Food Item:</strong> {{ order.item_name }}</p>
+                <p><strong>Quantity:</strong> {{ order.quantity }}</p>
+                <p class="order-total"><strong>Total: ₹{{ order.total }}</strong></p>
+                <p><strong>Status:</strong> {{ order.status }}</p>
+            </section>
+        {% endif %}
+
+        <div class="back-link">
+            <a href="/menu">← Back to Menu</a>
         </div>
-    {% endif %}
+
+    </main>
 
 </body>
 </html>

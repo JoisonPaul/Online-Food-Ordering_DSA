@@ -1,4 +1,4 @@
-from flask import Flask, render_template, render_template_string, request, jsonify
+from flask import Flask, render_template, request, jsonify
 from menu import menu
 from search import sequential_search
 from order import Order
@@ -9,11 +9,12 @@ app = Flask(__name__)
 
 # ---------------- INITIALIZATION ----------------
 
-# Create Hash Table and insert all menu items
+# Create Hash Table and insert only available food items
 food_hash_table = HashTable(10)
 
 for item in menu:
-    food_hash_table.insert(item["id"], item)
+    if item["quantity"] > 0 and item["is_available"]:
+        food_hash_table.insert(item["id"], item)
 
 # Create Circular Queue
 order_queue = CircularQueue(10)
@@ -83,8 +84,7 @@ def get_hash_table_data():
 
 @app.route("/")
 def home():
-    # Temporary: use search.html until index.html is available
-    return render_template("search.html", menu=menu)
+    return render_template("index.html")
 
 
 # ---------------- MENU PAGE ----------------
@@ -134,51 +134,105 @@ def place_order():
     message = ""
     order_details = None
 
-    # Optional food ID from the menu link
     selected_item_id = request.args.get("item_id", "")
 
     if request.method == "POST":
-        customer_name = request.form.get("customer_name", "").strip()
+        customer_name = request.form.get(
+            "customer_name", ""
+        ).strip()
 
         try:
             item_id = int(request.form.get("item_id", ""))
             quantity = int(request.form.get("quantity", ""))
 
-            item = food_hash_table.search(item_id)
+            # Validate customer name
+            if not customer_name:
+                message = "Please enter the customer name."
 
-            if item is None:
-                message = "Invalid Food ID. Please check the menu."
-
-            elif not item.get("is_available", True):
-                message = "This food item is currently unavailable."
+            # Validate quantity
+            elif quantity <= 0:
+                message = "Quantity must be greater than zero."
 
             else:
-                order = Order(
-                    next_order_id,
-                    customer_name,
-                    item["name"],
-                    quantity,
-                    item["price"]
-                )
+                # Find item in the hash table
+                item = food_hash_table.search(item_id)
 
-                order_data = {
-                    "order_id": order.order_id,
-                    "customer_name": order.customer_name,
-                    "item_name": order.item_name,
-                    "quantity": order.quantity,
-                    "total": order.total,
-                    "status": order.status
-                }
+                if item is None:
+                    message = (
+                        "Food item not found or out of stock. "
+                        "Please check the menu."
+                    )
 
-                if order_queue.enqueue(order_data):
-                    order_details = order_data
-                    next_order_id += 1
-                    message = "Order placed successfully!"
+                elif not item.get("is_available", True):
+                    message = "This food item is currently unavailable."
+
+                # Check stock before creating the order
+                elif quantity > item["quantity"]:
+                    message = (
+                        f"Insufficient stock! Only "
+                        f"{item['quantity']} unit(s) of "
+                        f"{item['name']} available."
+                    )
+
                 else:
-                    message = "Order queue is full. Please try again later."
+                    # Create the order
+                    order = Order(
+                        next_order_id,
+                        customer_name,
+                        item["name"],
+                        quantity,
+                        item["price"]
+                    )
+
+                    order_data = {
+                        "order_id": order.order_id,
+                        "customer_name": order.customer_name,
+                        "item_name": order.item_name,
+                        "quantity": order.quantity,
+                        "total": order.total,
+                        "status": order.status
+                    }
+
+                    # Add order to circular queue first
+                    if order_queue.enqueue(order_data):
+
+                        # Reserve stock only after successful enqueue
+                        item["quantity"] -= quantity
+
+                        if item["quantity"] == 0:
+                            # Mark item as unavailable
+                            item["is_available"] = False
+
+                            # Remove sold-out item from hash table
+                            food_hash_table.delete(item_id)
+
+                            message = (
+                                f"Order placed successfully! "
+                                f"{item['name']} is now out of stock "
+                                f"and has been removed from the hash table."
+                            )
+
+                        else:
+                            message = (
+                                f"Order placed successfully! "
+                                f"Remaining stock of {item['name']}: "
+                                f"{item['quantity']}."
+                            )
+
+                        order_details = order_data
+                        next_order_id += 1
+
+                    else:
+                        message = (
+                            "Order queue is full. "
+                            "Please try again later."
+                        )
 
         except ValueError:
-            message = "Enter a valid Food ID, customer name, and positive quantity."
+            message = (
+                "Enter a valid Food ID, customer name, "
+                "and positive quantity."
+            )
 
     return render_template(
         "place_order.html",
@@ -193,7 +247,12 @@ def place_order():
 @app.route("/orders/pending")
 def pending_orders_page():
     orders = get_pending_orders()
-    return render_template("orders.html", orders=orders, message="")
+
+    return render_template(
+        "orders.html",
+        orders=orders,
+        message=""
+    )
 
 
 # ---------------- PROCESS NEXT ORDER (PAGE) ----------------
@@ -218,8 +277,6 @@ def process_next_order_page():
 
 # ---------------- HASH TABLE PAGE ----------------
 
-
-
 @app.route("/hash-table")
 def hash_table_page():
     data = get_hash_table_data()
@@ -236,13 +293,13 @@ def hash_table_page():
     )
 
 
-
-
 # ---------------- API: PENDING ORDERS ----------------
 
 @app.route("/api/orders", methods=["GET"])
 def api_orders():
-    return jsonify({"orders": get_pending_orders()})
+    return jsonify({
+        "orders": get_pending_orders()
+    })
 
 
 # ---------------- API: PROCESS NEXT ORDER ----------------
@@ -252,7 +309,9 @@ def api_process_order():
     order = process_next_order()
 
     if order is None:
-        return jsonify({"message": "No pending orders to process."}), 404
+        return jsonify({
+            "message": "No pending orders to process."
+        }), 404
 
     return jsonify({
         "message": "Order processed successfully.",
@@ -265,6 +324,16 @@ def api_process_order():
 @app.route("/api/hash-table", methods=["GET"])
 def api_hash_table():
     return jsonify(get_hash_table_data())
+
+
+# ---------------- API: MENU STOCK ----------------
+
+@app.route("/api/menu", methods=["GET"])
+def api_menu():
+    return jsonify({
+        "menu": menu,
+        "hash_table_items": food_hash_table.count
+    })
 
 
 # ---------------- RUN APPLICATION ----------------
