@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, render_template_string, request, jsonify
 from menu import menu
 from search import sequential_search
 from order import Order
@@ -7,21 +7,104 @@ from hash_table import HashTable
 
 app = Flask(__name__)
 
-# Initialize Hash Table and insert menu items
+# ---------------- INITIALIZATION ----------------
+
+# Create Hash Table and insert all menu items
 food_hash_table = HashTable(10)
 
 for item in menu:
     food_hash_table.insert(item["id"], item)
 
-# Initialize Circular Queue
+# Create Circular Queue
 order_queue = CircularQueue(10)
 
 # Generate order IDs
 next_order_id = 1
 
 
-@app.route("/", methods=["GET", "POST"])
+# ---------------- HELPER FUNCTIONS ----------------
+
+def get_pending_orders():
+    """Return pending orders in FIFO order without removing them."""
+    orders = []
+
+    if order_queue.is_empty():
+        return orders
+
+    i = order_queue.front
+
+    while True:
+        orders.append(order_queue.queue[i])
+
+        if i == order_queue.rear:
+            break
+
+        i = (i + 1) % order_queue.capacity
+
+    return orders
+
+
+def process_next_order():
+    """Remove and complete the next order in FIFO order."""
+    order = order_queue.dequeue()
+
+    if order is None:
+        return None
+
+    order["status"] = "Completed"
+    return order
+
+
+def get_hash_table_data():
+    """Return hash table buckets and their collision chains."""
+    buckets = []
+
+    for index in range(food_hash_table.capacity):
+        items = []
+        current = food_hash_table.buckets[index]
+
+        while current is not None:
+            items.append(current.value)
+            current = current.next
+
+        buckets.append({
+            "index": index,
+            "items": items
+        })
+
+    return {
+        "capacity": food_hash_table.capacity,
+        "total_items": food_hash_table.count,
+        "buckets": buckets
+    }
+
+
+# ---------------- HOME PAGE ----------------
+
+@app.route("/")
 def home():
+    # Temporary: use search.html until index.html is available
+    return render_template("search.html", menu=menu)
+
+
+# ---------------- MENU PAGE ----------------
+
+@app.route("/menu")
+def display_menu():
+    category = request.args.get("category", "").strip()
+
+    if category:
+        filtered_menu = sequential_search(menu, category)
+    else:
+        filtered_menu = menu
+
+    return render_template("menu.html", menu=filtered_menu)
+
+
+# ---------------- SEARCH PAGE ----------------
+
+@app.route("/search", methods=["GET", "POST"])
+def search_food():
     results = []
     category = ""
     searched = False
@@ -35,23 +118,24 @@ def home():
 
     return render_template(
         "search.html",
+        menu=menu,
         results=results,
         category=category,
         searched=searched
     )
 
 
-@app.route("/menu")
-def display_menu():
-    return render_template("menu.html", menu=menu)
+# ---------------- PLACE ORDER ----------------
 
-
-@app.route("/place-order", methods=["GET", "POST"])
+@app.route("/orders/new", methods=["GET", "POST"])
 def place_order():
     global next_order_id
 
     message = ""
     order_details = None
+
+    # Optional food ID from the menu link
+    selected_item_id = request.args.get("item_id", "")
 
     if request.method == "POST":
         customer_name = request.form.get("customer_name", "").strip()
@@ -60,15 +144,15 @@ def place_order():
             item_id = int(request.form.get("item_id", ""))
             quantity = int(request.form.get("quantity", ""))
 
-            # Find food item using Hash Table
             item = food_hash_table.search(item_id)
 
             if item is None:
                 message = "Invalid Food ID. Please check the menu."
+
             elif not item.get("is_available", True):
-                message = "Sorry, this food item is currently unavailable."
+                message = "This food item is currently unavailable."
+
             else:
-                # Create Order object
                 order = Order(
                     next_order_id,
                     customer_name,
@@ -77,7 +161,6 @@ def place_order():
                     item["price"]
                 )
 
-                # Convert Order object into a dictionary for the queue
                 order_data = {
                     "order_id": order.order_id,
                     "customer_name": order.customer_name,
@@ -87,23 +170,104 @@ def place_order():
                     "status": order.status
                 }
 
-                # Add order to Circular Queue
                 if order_queue.enqueue(order_data):
                     order_details = order_data
                     next_order_id += 1
                     message = "Order placed successfully!"
                 else:
-                    message = "The order queue is full. Please try again later."
+                    message = "Order queue is full. Please try again later."
 
-        except ValueError as error:
-            message = str(error) if str(error) else "Enter valid numbers for Food ID and quantity."
+        except ValueError:
+            message = "Enter a valid Food ID, customer name, and positive quantity."
 
     return render_template(
         "place_order.html",
         message=message,
-        order=order_details
+        order=order_details,
+        selected_item_id=selected_item_id
     )
 
+
+# ---------------- PENDING ORDERS PAGE ----------------
+
+@app.route("/orders/pending")
+def pending_orders_page():
+    orders = get_pending_orders()
+    return render_template("orders.html", orders=orders, message="")
+
+
+# ---------------- PROCESS NEXT ORDER (PAGE) ----------------
+
+@app.route("/orders/process-next", methods=["POST"])
+def process_next_order_page():
+    order = process_next_order()
+
+    if order is None:
+        message = "No pending orders to process."
+    else:
+        message = f"Order #{order['order_id']} processed successfully."
+
+    orders = get_pending_orders()
+
+    return render_template(
+        "orders.html",
+        orders=orders,
+        message=message
+    )
+
+
+# ---------------- HASH TABLE PAGE ----------------
+
+
+
+@app.route("/hash-table")
+def hash_table_page():
+    data = get_hash_table_data()
+
+    collision_count = sum(
+        1 for bucket in data["buckets"]
+        if len(bucket["items"]) > 1
+    )
+
+    return render_template(
+        "hash_table.html",
+        data=data,
+        collision_count=collision_count
+    )
+
+
+
+
+# ---------------- API: PENDING ORDERS ----------------
+
+@app.route("/api/orders", methods=["GET"])
+def api_orders():
+    return jsonify({"orders": get_pending_orders()})
+
+
+# ---------------- API: PROCESS NEXT ORDER ----------------
+
+@app.route("/api/orders/process", methods=["POST"])
+def api_process_order():
+    order = process_next_order()
+
+    if order is None:
+        return jsonify({"message": "No pending orders to process."}), 404
+
+    return jsonify({
+        "message": "Order processed successfully.",
+        "order": order
+    })
+
+
+# ---------------- API: HASH TABLE ----------------
+
+@app.route("/api/hash-table", methods=["GET"])
+def api_hash_table():
+    return jsonify(get_hash_table_data())
+
+
+# ---------------- RUN APPLICATION ----------------
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hash Table Visualization</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        .hash-summary {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 25px 0;
+        }
+
+        .summary-card {
+            background: white;
+            padding: 18px 28px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .summary-card h2 {
+            color: #d35400;
+            margin: 0 0 8px;
+        }
+
+        .hash-buckets {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            max-width: 1000px;
+            margin: 25px auto;
+        }
+
+        .bucket-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: white;
+            padding: 18px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            overflow-x: auto;
+        }
+
+        .bucket-label {
+            min-width: 100px;
+            padding: 15px 10px;
+            text-align: center;
+            background: #34495e;
+            color: white;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .arrow {
+            font-size: 25px;
+            font-weight: bold;
+            color: #d35400;
+            flex-shrink: 0;
+        }
+
+        .node {
+            min-width: 180px;
+            padding: 15px;
+            background: #fff4e8;
+            border: 2px solid #e67e22;
+            border-radius: 8px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .node h3 {
+            margin: 0 0 8px;
+            font-size: 16px;
+            color: #a84300;
+        }
+
+        .node p {
+            margin: 5px 0;
+            font-size: 13px;
+        }
+
+        .empty-node {
+            color: #888;
+            font-style: italic;
+        }
+
+        .chain-end {
+            color: #555;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .availability {
+            font-weight: bold;
+        }
+
+        .available {
+            color: #218838;
+        }
+
+        .unavailable {
+            color: #c0392b;
+        }
+
+        .collision-label {
+            font-size: 12px;
+            color: #d35400;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        .hash-info {
+            max-width: 1000px;
+            margin: 25px auto;
+            padding: 18px;
+            background: white;
+            border-radius: 10px;
+            line-height: 1.7;
+        }
+
+        .hash-info code {
+            background: #f1f1f1;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 600px) {
+            .bucket-row {
+                align-items: flex-start;
+            }
+
+            .bucket-label {
+                min-width: 80px;
+            }
+
+            .node {
+                min-width: 155px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Hash Table Visualization</h1>
+
+    <nav>
+        <a href="/">Home</a>
+        <a href="/menu">Menu</a>
+        <a href="/search">Search</a>
+        <a href="/orders/new">Place Order</a>
+        <a href="/orders/pending">Order Management</a>
+        <a href="/hash-table">Hash Table</a>
+    </nav>
+
+    <div class="hash-summary">
+        <div class="summary-card">
+            <h2>{{ data["capacity"] }}</h2>
+            <p>Total Buckets</p>
+        </div>
+
+        <div class="summary-card">
+            <h2>{{ data["total_items"] }}</h2>
+            <p>Food Items</p>
+        </div>
+
+        <div class="summary-card">
+            <h2>{{ collision_count }}</h2>
+            <p>Buckets with Collisions</p>
+        </div>
+    </div>
+
+    <div class="hash-info">
+        <h2>Separate Chaining</h2>
+
+        <p>
+            Each Food ID is mapped to a bucket using the division method:
+            <code>h(key) = key % capacity</code>.
+        </p>
+
+        <p>
+            When multiple keys map to the same bucket, their nodes are connected
+            using a singly linked list. The arrows below represent the
+            <code>next</code> pointers between nodes.
+        </p>
+    </div>
+
+    <div class="hash-buckets">
+
+        {% for bucket in data["buckets"] %}
+        <div class="bucket-row">
+
+            <div class="bucket-label">
+                Bucket {{ bucket["index"] }}
+            </div>
+
+            <span class="arrow">→</span>
+
+            {% if bucket["items"] %}
+
+                {% for item in bucket["items"] %}
+
+                    <div class="node">
+                        <h3>{{ item["name"] }}</h3>
+
+                        <p><strong>ID:</strong> {{ item["id"] }}</p>
+                        <p>{{ item["category"] }}</p>
+                        <p><strong>Price:</strong> ₹{{ item["price"] }}</p>
+
+                        {% if item.get("is_available", true) %}
+                            <p class="availability available">Available</p>
+                        {% else %}
+                            <p class="availability unavailable">Out of Stock</p>
+                        {% endif %}
+
+                        {% if not loop.last %}
+                            <div class="collision-label">Collision</div>
+                        {% endif %}
+                    </div>
+
+                    <span class="arrow">→</span>
+
+                {% endfor %}
+
+                <span class="chain-end">NULL</span>
+
+            {% else %}
+
+                <span class="empty-node">Empty bucket → NULL</span>
+
+            {% endif %}
+
+        </div>
+        {% endfor %}
+
+    </div>
+
+    <div class="hash-info">
+        <h2>How to read the visualization</h2>
+
+        <ul>
+            <li><strong>Bucket:</strong> The array position calculated by the hash function.</li>
+            <li><strong>Node:</strong> A food item stored in the hash table.</li>
+            <li><strong>Arrow:</strong> The link to the next node in the chain.</li>
+            <li><strong>NULL:</strong> The end of the linked list.</li>
+            <li><strong>Collision:</strong> Multiple food IDs map to the same bucket.</li>
+        </ul>
+    </div>
+
+</body>
+</html>

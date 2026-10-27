@@ -1,0 +1,206 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management - Sunbeam Café</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        header {
+            background: #e67e22;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        nav {
+            background: #333;
+            padding: 14px;
+            text-align: center;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 12px;
+        }
+
+        nav a:hover {
+            color: #f39c12;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px #ddd;
+        }
+
+        .message {
+            background: #fff3cd;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #e67e22;
+            color: white;
+        }
+
+        .status {
+            color: #d35400;
+            font-weight: bold;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 25px;
+            color: #777;
+        }
+
+        button {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 11px 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        button:hover {
+            background: #219150;
+        }
+
+        .refresh {
+            background: #3498db;
+        }
+
+        .refresh:hover {
+            background: #2980b9;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Sunbeam Café</h1>
+    <p>Order Management System</p>
+</header>
+
+<nav>
+    <a href="/">Home</a>
+    <a href="/menu">Menu</a>
+    <a href="/search">Search Food</a>
+    <a href="/orders/new">Place Order</a>
+    <a href="/orders/pending">Manage Orders</a>
+    <a href="/hash-table">Hash Table</a>
+</nav>
+
+<div class="container">
+
+    <h2>Pending Orders</h2>
+
+    {% if message %}
+        <div class="message">{{ message }}</div>
+    {% endif %}
+
+    <div class="card">
+        <h3>Circular Queue — FIFO</h3>
+        <p>
+            Orders are processed using the
+            <strong>First In, First Out (FIFO)</strong> principle.
+            The earliest pending order is processed first.
+        </p>
+
+        <p><strong>Pending orders:</strong> {{ orders|length }}</p>
+
+        <div class="actions">
+            <form action="/orders/process-next" method="POST">
+                <button type="submit">Process Next Order</button>
+            </form>
+
+            <form action="/orders/pending" method="GET">
+                <button type="submit" class="refresh">Refresh Orders</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Order Queue</h3>
+
+        {% if orders %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Food Item</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>#{{ order["order_id"] }}</td>
+                        <td>{{ order["customer_name"] }}</td>
+                        <td>{{ order["item_name"] }}</td>
+                        <td>{{ order["quantity"] }}</td>
+                        <td>₹{{ order["total"] }}</td>
+                        <td class="status">{{ order.get("status", "Pending") }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty">
+                <h3>No Pending Orders</h3>
+                <p>Place an order to see it appear in the circular queue.</p>
+                <a href="/orders/new">Place a New Order</a>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+
+</body>
+</html>
