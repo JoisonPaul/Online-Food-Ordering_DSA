@@ -543,3 +543,399 @@ nav a.active {
         padding: 0 15px;
     }
 }
+
+/* ---------- MANAGE ORDERS PAGE ---------- */
+
+.orders-page,
+.hash-page {
+    max-width: 1200px;
+    margin: 35px auto;
+    padding: 0 25px;
+}
+
+.orders-summary,
+.hash-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.orders-summary-card,
+.hash-summary-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 24px 15px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    color: #666;
+    text-align: center;
+}
+
+.orders-number,
+.hash-number {
+    color: #d35400;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.orders-panel {
+    background: white;
+    padding: 28px;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+}
+
+.orders-panel-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.orders-panel-heading h2 {
+    color: #d35400;
+    margin-top: 0;
+    margin-bottom: 8px;
+}
+
+.orders-panel-heading p {
+    color: #777;
+    margin: 0;
+}
+
+.process-button {
+    display: inline-block;
+    padding: 12px 18px;
+    background: #d35400;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.process-button:hover {
+    background: #a84300;
+}
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.orders-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.orders-table th {
+    background: #fff0e5;
+    color: #9b4100;
+    padding: 15px 12px;
+    white-space: nowrap;
+}
+
+.orders-table td {
+    padding: 15px 12px;
+    border-bottom: 1px solid #eee;
+}
+
+.orders-table tbody tr:hover {
+    background: #fffaf6;
+}
+
+.orders-table .next-order-row {
+    background: #fff8f0;
+}
+
+.order-status {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.next-status {
+    background: #ffe3c2;
+    color: #994000;
+}
+
+.pending-status {
+    background: #e8efff;
+    color: #3056a0;
+}
+
+.fifo-note {
+    margin-top: 20px;
+    padding: 13px;
+    background: #fff8f0;
+    border-left: 4px solid #d35400;
+    color: #854000;
+    border-radius: 5px;
+}
+
+.order-message {
+    padding: 15px;
+    margin-bottom: 22px;
+    border-left: 4px solid #d35400;
+    border-radius: 6px;
+    background: #fff3e8;
+    overflow-wrap: anywhere;
+}
+
+.empty-orders {
+    text-align: center;
+    padding: 40px 20px;
+    color: #777;
+}
+
+.empty-orders h3 {
+    color: #d35400;
+}
+
+.empty-orders .process-button {
+    margin-top: 12px;
+}
+
+.orders-footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    flex-wrap: wrap;
+    margin: 25px 0;
+}
+
+.orders-footer-links a {
+    color: #d35400;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.orders-footer-links a:hover {
+    text-decoration: underline;
+}
+
+
+/* ---------- HASH TABLE PAGE ---------- */
+
+.hash-explanation {
+    background: white;
+    padding: 28px;
+    margin-bottom: 35px;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+
+.hash-explanation h2,
+.hash-buckets-section > h2,
+.hash-notes > h2 {
+    color: #d35400;
+    margin-top: 0;
+}
+
+.hash-explanation p,
+.hash-description {
+    color: #666;
+    line-height: 1.7;
+}
+
+.hash-formula {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px;
+    margin: 20px 0;
+    background: #fff3e8;
+    border-radius: 8px;
+}
+
+.hash-formula strong {
+    color: #9b4100;
+}
+
+.hash-formula code {
+    padding: 8px 12px;
+    background: white;
+    border-radius: 5px;
+    color: #333;
+    font-size: 15px;
+}
+
+.hash-buckets-section {
+    margin-bottom: 40px;
+}
+
+.hash-buckets-section > h2,
+.hash-description {
+    text-align: center;
+}
+
+.hash-bucket-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    margin-top: 25px;
+}
+
+.hash-bucket {
+    min-width: 0;
+    background: white;
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+}
+
+.hash-bucket.has-collision {
+    border: 2px solid #e69a52;
+}
+
+.bucket-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding: 13px 15px;
+    background: #fff0e5;
+    color: #9b4100;
+    font-weight: bold;
+}
+
+.collision-badge {
+    padding: 4px 8px;
+    border-radius: 15px;
+    background: #ffe0bd;
+    color: #8c3900;
+    font-size: 11px;
+}
+
+.bucket-content {
+    padding: 15px;
+}
+
+.hash-node {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 13px;
+    background: #fafafa;
+    border: 1px solid #eee;
+    border-radius: 7px;
+    overflow-wrap: anywhere;
+}
+
+.hash-node strong {
+    color: #333;
+}
+
+.hash-node span {
+    color: #777;
+    font-size: 13px;
+}
+
+.chain-arrow {
+    text-align: center;
+    color: #d35400;
+    font-size: 22px;
+    font-weight: bold;
+    padding: 5px;
+}
+
+.empty-bucket {
+    color: #aaa;
+    font-style: italic;
+    text-align: center;
+    padding: 8px;
+}
+
+.hash-notes {
+    margin-bottom: 35px;
+}
+
+.hash-notes > h2 {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.hash-notes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.hash-note-card {
+    background: white;
+    padding: 22px;
+    border-radius: 10px;
+    border-left: 4px solid #d35400;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.05);
+}
+
+.hash-note-card h3 {
+    margin-top: 0;
+    color: #d35400;
+}
+
+.hash-note-card p {
+    margin-bottom: 0;
+    color: #666;
+    line-height: 1.6;
+}
+
+
+/* ---------- RESPONSIVE LAYOUT ---------- */
+
+@media (max-width: 850px) {
+    .hash-bucket-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .orders-panel-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 600px) {
+    .orders-page,
+    .hash-page {
+        padding: 0 15px;
+    }
+
+    .orders-summary,
+    .hash-summary {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .orders-panel {
+        padding: 18px;
+    }
+
+    .hash-bucket-grid,
+    .hash-notes-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hash-explanation {
+        padding: 20px;
+    }
+
+    .hash-formula {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
