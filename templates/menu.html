@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Menu</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <header>
+        <h1>Our Food Menu</h1>
+        <p class="page-subtitle">Explore our menu and find your favourites.</p>
+
+        <nav>
+            <a href="/">Home</a>
+            <a href="/menu" class="active">Menu</a>
+            <a href="/search">Search Food</a>
+            <a href="/orders/new">Place Order</a>
+            <a href="/orders/pending">Manage Orders</a>
+            <a href="/hash-table">Hash Table</a>
+        </nav>
+    </header>
+
+    <main class="menu-page">
+
+        <section class="menu-summary">
+            <div class="summary-card">
+                <span class="summary-number">{{ menu|length }}</span>
+                <span class="summary-label">Items Displayed</span>
+            </div>
+
+            <div class="summary-card">
+                <span class="summary-number">
+                    {{ menu|selectattr('quantity', 'gt', 0)|list|length }}
+                </span>
+                <span class="summary-label">In Stock</span>
+            </div>
+
+            <div class="summary-card">
+                <span class="summary-number">
+                    {{ menu|rejectattr('quantity', 'gt', 0)|list|length }}
+                </span>
+                <span class="summary-label">Out of Stock</span>
+            </div>
+        </section>
+
+        <section class="menu-section">
+            <h2>Available Food Items</h2>
+
+            <div class="menu-container">
+                {% for item in menu %}
+                    <div class="food-card">
+
+                        <div class="food-card-header">
+                            <span class="food-category">{{ item.category }}</span>
+
+                            {% if item.quantity > 0 and item.is_available %}
+                                <span class="stock-badge in-stock">In Stock</span>
+                            {% else %}
+                                <span class="stock-badge sold-out">Out of Stock</span>
+                            {% endif %}
+                        </div>
+
+                        <h3>{{ item.name }}</h3>
+
+                        <p class="food-id">Food ID: {{ item.id }}</p>
+
+                        <div class="food-details">
+                            <p>
+                                <span>Price</span>
+                                <strong>₹{{ item.price }}</strong>
+                            </p>
+
+                            <p>
+                                <span>Quantity Available</span>
+                                <strong>{{ item.quantity }}</strong>
+                            </p>
+                        </div>
+
+                        {% if item.quantity > 0 and item.is_available %}
+                            <a class="food-order-button"
+                               href="{{ url_for('place_order', item_id=item.id) }}">
+                                Order Now →
+                            </a>
+                        {% else %}
+                            <button class="food-disabled-button" disabled>
+                                Currently Unavailable
+                            </button>
+                        {% endif %}
+
+                    </div>
+                {% else %}
+                    <p class="empty-menu">No food items found.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+    </main>
+
+</body>
+</html>
