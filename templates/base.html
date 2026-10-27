@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sunbeam Café{% endblock %}</title>
+
+    <!-- Google Fonts: Playfair Display (Serif), DM Sans (Sans), JetBrains Mono (Code/DSA) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&family=JetBrains+Mono:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500..800;1,500..800&display=swap" rel="stylesheet">
+
+    <!-- Design System Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <div class="site-wrapper">
+
+        <!-- Masthead Header -->
+        <header class="site-header">
+            <div class="header-inner">
+                <a href="/" class="brand-block" aria-label="Sunbeam Café Home">
+                    <div class="brand-mark">
+                        <!-- Minimalist Warm Sunbeam Line Icon -->
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="4"/>
+                            <path d="M12 2v2"/>
+                            <path d="M12 20v2"/>
+                            <path d="m4.93 4.93 1.41 1.41"/>
+                            <path d="m17.66 17.66 1.41 1.41"/>
+                            <path d="M2 12h2"/>
+                            <path d="M20 12h2"/>
+                            <path d="m6.34 17.66-1.41 1.41"/>
+                            <path d="m19.07 4.93-1.41 1.41"/>
+                        </svg>
+                    </div>
+                    <div class="brand-text">
+                        <span class="brand-title">Sunbeam Café</span>
+                        <span class="brand-tagline">DSA Food Ordering</span>
+                    </div>
+                </a>
+
+                <nav class="site-nav" id="site-nav" aria-label="Primary navigation">
+                    <a href="/"
+                       class="nav-link {% if request.path == '/' %}active{% endif %}"
+                       {% if request.path == '/' %}aria-current="page"{% endif %}>
+                        Home
+                    </a>
+                    <a href="/menu"
+                       class="nav-link {% if request.path == '/menu' %}active{% endif %}"
+                       {% if request.path == '/menu' %}aria-current="page"{% endif %}>
+                        Menu
+                    </a>
+                    <a href="/search"
+                       class="nav-link {% if request.path == '/search' %}active{% endif %}"
+                       {% if request.path == '/search' %}aria-current="page"{% endif %}>
+                        Search Food
+                    </a>
+                    <a href="/orders/new"
+                       class="nav-link {% if request.path == '/orders/new' %}active{% endif %}"
+                       {% if request.path == '/orders/new' %}aria-current="page"{% endif %}>
+                        Place Order
+                    </a>
+                    <a href="/orders/pending"
+                       class="nav-link {% if request.path in ['/orders/pending', '/orders/process-next'] %}active{% endif %}"
+                       {% if request.path in ['/orders/pending', '/orders/process-next'] %}aria-current="page"{% endif %}>
+                        Manage Orders
+                    </a>
+                    <a href="/hash-table"
+                       class="nav-link {% if request.path == '/hash-table' %}active{% endif %}"
+                       {% if request.path == '/hash-table' %}aria-current="page"{% endif %}>
+                        Hash Table
+                    </a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content Block -->
+        <main class="site-main">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Editorial Footer -->
+        <footer class="site-footer">
+            <div class="footer-inner">
+                <div>
+                    <strong>Sunbeam Café</strong> — In-Memory Food Ordering System
+                </div>
+                <div class="footer-dsa-badge">
+                    DSA: Sequential Search • Hash Table (Chaining) • Circular Queue (FIFO)
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    {% block scripts %}{% endblock %}
+
+</body>
+</html>

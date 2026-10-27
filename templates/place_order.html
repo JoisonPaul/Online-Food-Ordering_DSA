@@ -1,99 +1,121 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Place Your Order</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
+{% extends "base.html" %}
 
-    <header>
+{% block title %}Place Your Order | Sunbeam Café{% endblock %}
+
+{% block content %}
+<div class="order-page">
+
+    <!-- Page Header -->
+    <div class="page-header">
         <h1>Place Your Order</h1>
-        <p class="page-subtitle">Enter your details to order your favourite food.</p>
+        <p class="page-subtitle">Submit your order details to reserve inventory and queue kitchen preparation.</p>
+    </div>
 
-        <nav>
-            <a href="/search">Search</a>
-            <a href="/menu">Menu</a>
-            <a href="/orders/new" class="active">Place Order</a>
-            <a href="/orders/pending">Manage Orders</a>
-            <a href="/hash-table">Hash Table</a>
-        </nav>
-    </header>
-
-    <main class="order-page">
-
-        <section class="order-form-card">
-            <h2>Order Details</h2>
-            <p class="form-description">Fill in the details below to place your order.</p>
-
-            <form method="POST" action="{{ url_for('place_order') }}">
-
-                <div class="form-group">
-                    <label for="customer_name">Customer Name</label>
-                    <input
-                        type="text"
-                        id="customer_name"
-                        name="customer_name"
-                        placeholder="Enter your name"
-                        required
-                    >
-                </div>
-
-                <div class="form-group">
-                    <label for="item_id">Food ID</label>
-                    <input
-                        type="number"
-                        id="item_id"
-                        name="item_id"
-                        min="1"
-                        value="{{ selected_item_id }}"
-                        placeholder="Example: 102"
-                        required
-                    >
-                    <small>Check the Food ID on the Menu page.</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="quantity">Quantity</label>
-                    <input
-                        type="number"
-                        id="quantity"
-                        name="quantity"
-                        min="1"
-                        placeholder="Enter quantity"
-                        required
-                    >
-                </div>
-
-                <button type="submit" class="order-button">Place Order</button>
-
-            </form>
-        </section>
-
-        {% if message %}
-            <div class="message-box">
-                {{ message }}
+    <!-- Alert / Message Banner -->
+    {% if message %}
+        <div class="message-box {% if 'successfully' in message %}message-success{% else %}message-error{% endif %}">
+            <div style="font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.05em; margin-bottom: 4px;">
+                {% if 'successfully' in message %}
+                    STATUS: CONFIRMED
+                {% else %}
+                    NOTICE
+                {% endif %}
             </div>
-        {% endif %}
-
-        {% if order %}
-            <section class="order-confirmation">
-                <h2>Order Confirmation</h2>
-                <p><strong>Order ID:</strong> {{ order.order_id }}</p>
-                <p><strong>Customer:</strong> {{ order.customer_name }}</p>
-                <p><strong>Food Item:</strong> {{ order.item_name }}</p>
-                <p><strong>Quantity:</strong> {{ order.quantity }}</p>
-                <p class="order-total"><strong>Total: ₹{{ order.total }}</strong></p>
-                <p><strong>Status:</strong> {{ order.status }}</p>
-            </section>
-        {% endif %}
-
-        <div class="back-link">
-            <a href="/menu">← Back to Menu</a>
+            <div>{{ message }}</div>
         </div>
+    {% endif %}
 
-    </main>
+    <!-- Order Form Card -->
+    <section class="order-form-card">
+        <h2>Order Details</h2>
+        <p class="form-description">Please enter customer name, Food ID from the menu, and order quantity.</p>
 
-</body>
-</html>
+        <form method="POST" action="{{ url_for('place_order') }}">
+
+            <div class="form-group">
+                <label for="customer_name">Customer Name</label>
+                <input
+                    type="text"
+                    id="customer_name"
+                    name="customer_name"
+                    placeholder="Enter customer name"
+                    required
+                    autocomplete="name"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="item_id">Food ID</label>
+                <input
+                    type="number"
+                    id="item_id"
+                    name="item_id"
+                    min="1"
+                    value="{{ selected_item_id }}"
+                    placeholder="e.g. 101"
+                    required
+                >
+                <small>Browse Food IDs (101–120) on the Menu page.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="quantity">Quantity</label>
+                <input
+                    type="number"
+                    id="quantity"
+                    name="quantity"
+                    min="1"
+                    placeholder="Enter quantity (e.g. 1, 2)"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="order-button">
+                <span>Place Order</span>
+            </button>
+
+        </form>
+    </section>
+
+    <!-- Order Confirmation Receipt Card -->
+    {% if order %}
+        <section class="order-confirmation">
+            <h2>Order Confirmation</h2>
+            <p>
+                <span>Order ID:</span>
+                <strong>#{{ order.order_id }}</strong>
+            </p>
+            <p>
+                <span>Customer:</span>
+                <strong>{{ order.customer_name }}</strong>
+            </p>
+            <p>
+                <span>Food Item:</span>
+                <strong>{{ order.item_name }}</strong>
+            </p>
+            <p>
+                <span>Quantity:</span>
+                <strong>{{ order.quantity }} unit(s)</strong>
+            </p>
+            <p class="order-total">
+                <span>Total Amount:</span>
+                <strong>₹{{ order.total }}</strong>
+            </p>
+            <p>
+                <span>Queue Status:</span>
+                <span class="order-status next-status">{{ order.status }}</span>
+            </p>
+        </section>
+    {% endif %}
+
+    <div class="back-link">
+        <a href="/menu" class="btn btn-secondary btn-sm">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            <span>Back to Menu</span>
+        </a>
+    </div>
+
+</div>
+{% endblock %}

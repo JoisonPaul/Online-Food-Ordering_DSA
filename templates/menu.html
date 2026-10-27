@@ -1,64 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Food Menu</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
+{% extends "base.html" %}
 
-    <header>
+{% block title %}Our Food Menu | Sunbeam Café{% endblock %}
+
+{% block content %}
+<div class="menu-page">
+
+    <!-- Page Header -->
+    <div class="page-header">
         <h1>Our Food Menu</h1>
-        <p class="page-subtitle">Explore our menu and find your favourites.</p>
+        <p class="page-subtitle">Explore our artisanal café menu, fresh ingredients, and real-time inventory.</p>
+    </div>
 
-        <nav>
-            <a href="/">Home</a>
-            <a href="/menu" class="active">Menu</a>
-            <a href="/search">Search Food</a>
-            <a href="/orders/new">Place Order</a>
-            <a href="/orders/pending">Manage Orders</a>
-            <a href="/hash-table">Hash Table</a>
-        </nav>
-    </header>
+    <!-- Summary Metrics Strip -->
+    <section class="menu-summary">
+        <div class="summary-card">
+            <span class="summary-number">{{ menu|length }}</span>
+            <span class="summary-label">Items Displayed</span>
+        </div>
 
-    <main class="menu-page">
+        <div class="summary-card">
+            <span class="summary-number">
+                {{ menu|selectattr('quantity', 'gt', 0)|list|length }}
+            </span>
+            <span class="summary-label">In Stock</span>
+        </div>
 
-        <section class="menu-summary">
-            <div class="summary-card">
-                <span class="summary-number">{{ menu|length }}</span>
-                <span class="summary-label">Items Displayed</span>
-            </div>
+        <div class="summary-card">
+            <span class="summary-number">
+                {{ menu|rejectattr('quantity', 'gt', 0)|list|length }}
+            </span>
+            <span class="summary-label">Out of Stock</span>
+        </div>
+    </section>
 
-            <div class="summary-card">
-                <span class="summary-number">
-                    {{ menu|selectattr('quantity', 'gt', 0)|list|length }}
-                </span>
-                <span class="summary-label">In Stock</span>
-            </div>
+    <!-- Menu Cards Section -->
+    <section class="menu-section">
+        <h2>Available Food Items</h2>
 
-            <div class="summary-card">
-                <span class="summary-number">
-                    {{ menu|rejectattr('quantity', 'gt', 0)|list|length }}
-                </span>
-                <span class="summary-label">Out of Stock</span>
-            </div>
-        </section>
+        <div class="menu-container">
+            {% for item in menu %}
+                <div class="food-card">
 
-        <section class="menu-section">
-            <h2>Available Food Items</h2>
-
-            <div class="menu-container">
-                {% for item in menu %}
-                    <div class="food-card">
-
+                    <div>
                         <div class="food-card-header">
                             <span class="food-category">{{ item.category }}</span>
 
                             {% if item.quantity > 0 and item.is_available %}
-                                <span class="stock-badge in-stock">In Stock</span>
+                                <span class="stock-badge in-stock">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                    In Stock
+                                </span>
                             {% else %}
-                                <span class="stock-badge sold-out">Out of Stock</span>
+                                <span class="stock-badge sold-out">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                    Out of Stock
+                                </span>
                             {% endif %}
                         </div>
 
@@ -77,26 +78,30 @@
                                 <strong>{{ item.quantity }}</strong>
                             </p>
                         </div>
+                    </div>
 
+                    <div>
                         {% if item.quantity > 0 and item.is_available %}
                             <a class="food-order-button"
                                href="{{ url_for('place_order', item_id=item.id) }}">
-                                Order Now →
+                                <span>Order Now</span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
                             </a>
                         {% else %}
                             <button class="food-disabled-button" disabled>
                                 Currently Unavailable
                             </button>
                         {% endif %}
-
                     </div>
-                {% else %}
-                    <p class="empty-menu">No food items found.</p>
-                {% endfor %}
-            </div>
-        </section>
 
-    </main>
+                </div>
+            {% else %}
+                <p class="empty-menu">No food items found.</p>
+            {% endfor %}
+        </div>
+    </section>
 
-</body>
-</html>
+</div>
+{% endblock %}
